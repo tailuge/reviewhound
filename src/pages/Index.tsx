@@ -2,9 +2,7 @@ import { useState } from "react";
 import { TreeView } from "@/components/TreeView";
 import { CodePanel } from "@/components/CodePanel";
 import { ResizablePanel } from "@/components/ResizablePanel";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
+import { RepoHeader } from "@/components/RepoHeader";
 import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -77,25 +75,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-vscode-bg border-b border-vscode-border p-4">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex gap-4">
-          <Input
-            type="text"
-            placeholder="Enter GitHub repository URL"
-            value={repoUrl}
-            onChange={(e) => setRepoUrl(e.target.value)}
-            className="flex-1 bg-vscode-active border-vscode-border text-vscode-text"
-          />
-          <Button 
-            type="submit" 
-            className="bg-vscode-blue hover:bg-vscode-blue/90"
-            disabled={isLoading}
-          >
-            <Github className="w-4 h-4 mr-2" />
-            {isLoading ? "Loading..." : "Load Repository"}
-          </Button>
-        </form>
-      </header>
+      <RepoHeader
+        repoUrl={repoUrl}
+        onRepoUrlChange={setRepoUrl}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+      />
 
       <main className="flex-1 overflow-hidden">
         <ResizablePanel

@@ -52,6 +52,13 @@ export async function fetchFileContent(repoUrl: string, filePath: string): Promi
 function buildTree(items: GitHubTreeItem[]): TreeItem[] {
   const root: { [key: string]: TreeItem } = {};
 
+  // Sort items to ensure directories are processed first
+  items.sort((a, b) => {
+    const aIsDir = !a.path.includes('.');
+    const bIsDir = !b.path.includes('.');
+    return bIsDir ? 1 : aIsDir ? -1 : 0;
+  });
+
   items.forEach((item) => {
     const parts = item.path.split('/');
     let current = root;
