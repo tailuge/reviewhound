@@ -18,7 +18,7 @@ const DEFAULT_REPO = "https://github.com/tailuge/codorebyu";
 export async function fetchRepoTree(repoUrl: string = DEFAULT_REPO): Promise<TreeItem[]> {
   try {
     const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/');
-    const response = await fetch(`${apiUrl}/git/trees/main?recursive=1`);
+    const response = await fetch(`${apiUrl}/git/trees/main?recursive=3`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch repository data');
