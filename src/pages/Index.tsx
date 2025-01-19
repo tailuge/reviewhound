@@ -5,53 +5,50 @@ import { ResizablePanel } from "@/components/ResizablePanel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
+import { fetchRepoTree } from "@/utils/github";
+import { useToast } from "@/components/ui/use-toast";
 
-const sampleData = [
-  {
-    name: "src",
-    type: "folder" as const,
-    children: [
-      { name: "main.tsx", type: "file" as const },
-      { name: "App.tsx", type: "file" as const },
-      {
-        name: "components",
-        type: "folder" as const,
-        children: [
-          { name: "Button.tsx", type: "file" as const },
-          { name: "Input.tsx", type: "file" as const },
-        ],
-      },
-    ],
-  },
-  {
-    name: "public",
-    type: "folder" as const,
-    children: [
-      { name: "index.html", type: "file" as const },
-      { name: "styles.css", type: "file" as const },
-    ],
-  },
-];
-
-const sampleCode = `import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);`;
+interface TreeItem {
+  name: string;
+  type: "file" | "folder";
+  children?: TreeItem[];
+}
 
 const Index = () => {
   const [repoUrl, setRepoUrl] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [treeData, setTreeData] = useState<TreeItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement GitHub repo fetching
-    console.log("Fetching repo:", repoUrl);
+    if (!repoUrl) {
+      toast({
+        title: "Error",
+        description: "Please enter a GitHub repository URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const tree = await fetchRepoTree(repoUrl);
+      setTreeData(tree);
+      toast({
+        title: "Success",
+        description: "Repository loaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load repository. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,9 +62,13 @@ const Index = () => {
             onChange={(e) => setRepoUrl(e.target.value)}
             className="flex-1 bg-vscode-active border-vscode-border text-vscode-text"
           />
-          <Button type="submit" className="bg-vscode-blue hover:bg-vscode-blue/90">
+          <Button 
+            type="submit" 
+            className="bg-vscode-blue hover:bg-vscode-blue/90"
+            disabled={isLoading}
+          >
             <Github className="w-4 h-4 mr-2" />
-            Load Repository
+            {isLoading ? "Loading..." : "Load Repository"}
           </Button>
         </form>
       </header>
@@ -76,11 +77,11 @@ const Index = () => {
         <ResizablePanel
           left={
             <TreeView
-              data={sampleData}
+              data={treeData}
               onSelect={(item) => setSelectedFile(item.name)}
             />
           }
-          right={<CodePanel code={selectedFile ? sampleCode : undefined} />}
+          right={<CodePanel code={selectedFile ? selectedFile : undefined} />}
         />
       </main>
 
