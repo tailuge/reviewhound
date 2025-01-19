@@ -18,9 +18,13 @@ const TreeViewItem = ({ item, onSelect }: { item: TreeItem; onSelect: (item: Tre
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClick = () => {
+    console.log('TreeViewItem clicked:', item);
     if (item.type === "folder") {
+      console.log('Toggling folder state:', !isOpen);
+      console.log('Folder children:', item.children);
       setIsOpen(!isOpen);
     } else {
+      console.log('Selecting file:', item.path);
       onSelect(item);
     }
   };
@@ -60,6 +64,7 @@ const TreeViewItem = ({ item, onSelect }: { item: TreeItem; onSelect: (item: Tre
 };
 
 export const TreeView = ({ data, onSelect }: TreeViewProps) => {
+  console.log('TreeView rendered with data:', data);
   return (
     <div className="tree-view">
       {data.map((item, index) => (
