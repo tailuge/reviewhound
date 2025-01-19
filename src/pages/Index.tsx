@@ -5,18 +5,23 @@ import { ResizablePanel } from "@/components/ResizablePanel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
-import { fetchRepoTree } from "@/utils/github";
+import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
 
 interface TreeItem {
   name: string;
   type: "file" | "folder";
   children?: TreeItem[];
+  path?: string;
+  content?: string;
 }
 
+const DEFAULT_REPO = "https://github.com/tailuge/codorebyu";
+
 const Index = () => {
-  const [repoUrl, setRepoUrl] = useState("");
+  const [repoUrl, setRepoUrl] = useState(DEFAULT_REPO);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -51,6 +56,25 @@ const Index = () => {
     }
   };
 
+  const handleFileSelect = async (item: TreeItem) => {
+    if (item.type === "file" && item.path) {
+      setIsLoading(true);
+      try {
+        const content = await fetchFileContent(repoUrl, item.path);
+        setSelectedFile(item.name);
+        setFileContent(content);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load file content",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-vscode-bg border-b border-vscode-border p-4">
@@ -78,10 +102,10 @@ const Index = () => {
           left={
             <TreeView
               data={treeData}
-              onSelect={(item) => setSelectedFile(item.name)}
+              onSelect={handleFileSelect}
             />
           }
-          right={<CodePanel code={selectedFile ? selectedFile : undefined} />}
+          right={<CodePanel code={fileContent || undefined} />}
         />
       </main>
 

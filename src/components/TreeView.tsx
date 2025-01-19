@@ -5,6 +5,8 @@ interface TreeItem {
   name: string;
   type: "file" | "folder";
   children?: TreeItem[];
+  path?: string;
+  content?: string;
 }
 
 interface TreeViewProps {
@@ -26,7 +28,7 @@ const TreeViewItem = ({ item, onSelect }: { item: TreeItem; onSelect: (item: Tre
   return (
     <div>
       <div
-        className="tree-item"
+        className="tree-item flex items-center gap-2 px-2 py-1 hover:bg-vscode-active cursor-pointer"
         onClick={handleClick}
       >
         {item.type === "folder" ? (

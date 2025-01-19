@@ -9,9 +9,13 @@ interface TreeItem {
   name: string;
   type: "file" | "folder";
   children?: TreeItem[];
+  path?: string;
+  content?: string;
 }
 
-export async function fetchRepoTree(repoUrl: string): Promise<TreeItem[]> {
+const DEFAULT_REPO = "https://github.com/tailuge/codorebyu";
+
+export async function fetchRepoTree(repoUrl: string = DEFAULT_REPO): Promise<TreeItem[]> {
   try {
     const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/');
     const response = await fetch(`${apiUrl}/git/trees/main?recursive=1`);
@@ -24,6 +28,23 @@ export async function fetchRepoTree(repoUrl: string): Promise<TreeItem[]> {
     return buildTree(repoData.tree);
   } catch (error) {
     console.error('Error fetching repo tree:', error);
+    throw error;
+  }
+}
+
+export async function fetchFileContent(repoUrl: string, filePath: string): Promise<string> {
+  try {
+    const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/');
+    const response = await fetch(`${apiUrl}/contents/${filePath}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch file content');
+    }
+
+    const fileData = await response.json();
+    return atob(fileData.content); // Decode base64 content
+  } catch (error) {
+    console.error('Error fetching file content:', error);
     throw error;
   }
 }
@@ -41,7 +62,8 @@ function buildTree(items: GitHubTreeItem[]): TreeItem[] {
         if (item.type === 'blob') {
           current[part] = {
             name: part,
-            type: 'file'
+            type: 'file',
+            path: item.path
           };
         }
       } else {
