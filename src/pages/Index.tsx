@@ -3,6 +3,7 @@ import { TreeView } from "@/components/TreeView";
 import { CodePanel } from "@/components/CodePanel";
 import { ResizablePanel } from "@/components/ResizablePanel";
 import { RepoHeader } from "@/components/RepoHeader";
+import { Terminal } from "@/components/Terminal";
 import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -82,33 +83,22 @@ const Index = () => {
         isLoading={isLoading}
       />
 
-      <main className="flex-1 overflow-hidden">
-        <ResizablePanel
-          left={
-            <TreeView
-              data={treeData}
-              onSelect={handleFileSelect}
-            />
-          }
-          right={<CodePanel code={fileContent || undefined} />}
-        />
-      </main>
-
-      <footer className="bg-vscode-bg border-t border-vscode-border p-4 text-sm text-vscode-text/60">
-        <div className="max-w-3xl mx-auto text-center">
-          <a href="https://github.com" className="hover:text-vscode-text" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
-          {" • "}
-          <a href="https://icons8.com" className="hover:text-vscode-text" target="_blank" rel="noopener noreferrer">
-            Icons8
-          </a>
-          {" • "}
-          <a href="https://idx.dev" className="hover:text-vscode-text" target="_blank" rel="noopener noreferrer">
-            IDX
-          </a>
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-0">
+          <ResizablePanel
+            left={
+              <div className="h-full overflow-auto">
+                <TreeView
+                  data={treeData}
+                  onSelect={handleFileSelect}
+                />
+              </div>
+            }
+            right={<CodePanel code={fileContent || undefined} />}
+          />
         </div>
-      </footer>
+        <Terminal />
+      </main>
     </div>
   );
 };
