@@ -19,7 +19,7 @@ export async function fetchRepoTree(repoUrl: string = DEFAULT_REPO): Promise<Tre
   try {
     const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/');
     console.log('Fetching repo tree from:', apiUrl);
-    const response = await fetch(`${apiUrl}/git/trees/main?recursive=3`);
+    const response = await fetch(`${apiUrl}/git/trees/main?recursive=1`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch repository data');
@@ -55,46 +55,65 @@ export async function fetchFileContent(repoUrl: string, filePath: string): Promi
 function buildTree(items: GitHubTreeItem[]): TreeItem[] {
   console.log('Building tree from items:', items);
   const root: { [key: string]: TreeItem } = {};
+  const dirs: { [key: string]: TreeItem } = {};
 
-  // Sort items to ensure directories are processed first
-  items.sort((a, b) => {
-    const aIsDir = !a.path.includes('.');
-    const bIsDir = !b.path.includes('.');
-    return bIsDir ? 1 : aIsDir ? -1 : 0;
-  });
-
-  console.log('Sorted items:', items);
-
-  items.forEach((item) => {
+  // First pass: create all directories
+  items.forEach(item => {
     const parts = item.path.split('/');
-    let current = root;
-
-    parts.forEach((part, index) => {
-      console.log(`Processing part ${index}:`, part, 'of path:', item.path);
-      
-      if (index === parts.length - 1) {
-        // This is a file
-        if (item.type === 'blob') {
-          console.log('Adding file:', part);
-          current[part] = {
-            name: part,
-            type: 'file',
-            path: item.path
-          };
-        }
-      } else {
-        // This is a directory
-        if (!current[part]) {
-          console.log('Adding directory:', part);
-          current[part] = {
-            name: part,
-            type: 'folder',
-            children: []
-          };
-        }
-        current = (current[part].children || []) as unknown as { [key: string]: TreeItem };
+    let currentPath = '';
+    
+    // Create directory entries for each part of the path
+    parts.slice(0, -1).forEach(part => {
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+      if (!dirs[currentPath]) {
+        dirs[currentPath] = {
+          name: part,
+          type: 'folder',
+          children: [],
+          path: currentPath
+        };
       }
     });
+  });
+
+  // Second pass: add all files and build the tree structure
+  items.forEach(item => {
+    const parts = item.path.split('/');
+    const fileName = parts[parts.length - 1];
+    const parentPath = parts.slice(0, -1).join('/');
+    
+    if (item.type === 'blob') {
+      const fileItem: TreeItem = {
+        name: fileName,
+        type: 'file',
+        path: item.path
+      };
+      
+      if (parentPath === '') {
+        // Root level file
+        root[fileName] = fileItem;
+      } else {
+        // Add to parent directory's children
+        if (dirs[parentPath]) {
+          dirs[parentPath].children?.push(fileItem);
+        }
+      }
+    }
+  });
+
+  // Build the final tree structure
+  Object.keys(dirs).forEach(path => {
+    const parts = path.split('/');
+    const dirName = parts[parts.length - 1];
+    const parentPath = parts.slice(0, -1).join('/');
+    
+    if (parentPath === '') {
+      // Root level directory
+      root[dirName] = dirs[path];
+    } else if (dirs[parentPath]) {
+      // Add to parent directory's children
+      dirs[parentPath].children?.push(dirs[path]);
+    }
   });
 
   const result = Object.values(root);
