@@ -29,7 +29,7 @@
   }
 
   body {
-    @apply bg-vscode-bg text-vscode-text font-sans antialiased;
+    @apply bg-vscode-bg text-vscode-text font-sans antialiased h-screen flex flex-col;
   }
 
   * {
