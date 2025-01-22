@@ -97,7 +97,7 @@ const Index = () => {
             right={<CodePanel code={fileContent || undefined} />}
           />
         </div>
-        <Terminal />
+        <Terminal codeContent={fileContent || ""} />
       </main>
     </div>
   );
