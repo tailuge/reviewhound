@@ -64,7 +64,9 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
             modelName: selectedModel,
             openAIApiKey: apiKey,
             temperature: 0.2,
-            baseURL: "https://api.github.com/copilot/v1",
+            configuration: {
+              baseURL: "https://api.github.com/copilot/v1",
+            },
           });
           response = await githubOpenAI.invoke(
             `Please review this code and provide feedback on potential improvements, bugs, and best practices:
