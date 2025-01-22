@@ -1,85 +1,55 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { OpenAI } from "@langchain/openai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { VendorSelect } from "./terminal/VendorSelect";
+import { ModelSelect } from "./terminal/ModelSelect";
+import { LLMServiceFactory } from "@/services/llm/factory";
+import { LLMVendor, OpenAIModel } from "@/types/llm";
+import { useToast } from "@/hooks/use-toast";
 
 interface TerminalProps {
   codeContent?: string;
 }
 
-type Vendor = "openai" | "google" | "github";
-
 export const Terminal = ({ codeContent }: TerminalProps) => {
-  const [selectedVendor, setSelectedVendor] = useState<Vendor>("openai");
-  const [selectedModel, setSelectedModel] = useState("gpt-4o");
+  const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("openai");
+  const [selectedModel, setSelectedModel] = useState<OpenAIModel>("gpt-4o");
   const [apiKey, setApiKey] = useState("");
   const [review, setReview] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleReview = async () => {
     if (!apiKey || !codeContent) {
-      console.log("API key and code content are required");
+      toast({
+        title: "Error",
+        description: "API key and code content are required",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsLoading(true);
     try {
-      let response;
-      
-      switch (selectedVendor) {
-        case "openai":
-          const openai = new OpenAI({
-            modelName: selectedModel,
-            openAIApiKey: apiKey,
-            temperature: 0.2,
-          });
-          response = await openai.invoke(
-            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
-            
-            ${codeContent}`
-          );
-          break;
+      const response = await LLMServiceFactory.reviewCode({
+        code: codeContent,
+        apiKey,
+        vendor: selectedVendor,
+        model: selectedModel,
+      });
 
-        case "google":
-          const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-          const result = await model.generateContent(
-            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
-            
-            ${codeContent}`
-          );
-          response = result.response.text();
-          break;
-
-        case "github":
-          const githubOpenAI = new OpenAI({
-            modelName: selectedModel,
-            openAIApiKey: apiKey,
-            temperature: 0.2,
-            configuration: {
-              baseURL: "https://api.github.com/copilot/v1",
-            },
-          });
-          response = await githubOpenAI.invoke(
-            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
-            
-            ${codeContent}`
-          );
-          break;
+      if (response.error) {
+        throw new Error(response.error);
       }
 
-      setReview(response);
+      setReview(response.review);
     } catch (error) {
       console.error("Error during code review:", error);
-      setReview("Error occurred during code review");
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to review code",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -89,32 +59,9 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
     <div className="bg-vscode-bg border-t border-vscode-border h-[200px] flex flex-col">
       <div className="flex items-center justify-between p-2 border-b border-vscode-border">
         <div className="flex items-center gap-4">
-          <Select
-            value={selectedVendor}
-            onValueChange={(value: Vendor) => setSelectedVendor(value)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select vendor" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="google">Google AI</SelectItem>
-              <SelectItem value="github">GitHub Copilot</SelectItem>
-            </SelectContent>
-          </Select>
+          <VendorSelect value={selectedVendor} onChange={setSelectedVendor} />
           {selectedVendor === "openai" && (
-            <Select
-              value={selectedModel}
-              onValueChange={setSelectedModel}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4o">GPT-4 Optimized</SelectItem>
-                <SelectItem value="gpt-4o-mini">GPT-4 Mini</SelectItem>
-              </SelectContent>
-            </Select>
+            <ModelSelect value={selectedModel} onChange={setSelectedModel} />
           )}
           <Input
             type="password"
