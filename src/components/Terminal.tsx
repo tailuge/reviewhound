@@ -9,12 +9,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OpenAI } from "@langchain/openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface TerminalProps {
   codeContent?: string;
 }
 
+type Vendor = "openai" | "google" | "github";
+
 export const Terminal = ({ codeContent }: TerminalProps) => {
+  const [selectedVendor, setSelectedVendor] = useState<Vendor>("openai");
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [apiKey, setApiKey] = useState("");
   const [review, setReview] = useState("");
@@ -28,17 +32,47 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
 
     setIsLoading(true);
     try {
-      const model = new OpenAI({
-        modelName: selectedModel,
-        openAIApiKey: apiKey,
-        temperature: 0.2,
-      });
+      let response;
+      
+      switch (selectedVendor) {
+        case "openai":
+          const openai = new OpenAI({
+            modelName: selectedModel,
+            openAIApiKey: apiKey,
+            temperature: 0.2,
+          });
+          response = await openai.invoke(
+            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
+            
+            ${codeContent}`
+          );
+          break;
 
-      const response = await model.invoke(
-        `Please review this code and provide feedback on potential improvements, bugs, and best practices:
-        
-        ${codeContent}`
-      );
+        case "google":
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+          const result = await model.generateContent(
+            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
+            
+            ${codeContent}`
+          );
+          response = result.response.text();
+          break;
+
+        case "github":
+          const githubOpenAI = new OpenAI({
+            modelName: selectedModel,
+            openAIApiKey: apiKey,
+            temperature: 0.2,
+            baseURL: "https://api.github.com/copilot/v1",
+          });
+          response = await githubOpenAI.invoke(
+            `Please review this code and provide feedback on potential improvements, bugs, and best practices:
+            
+            ${codeContent}`
+          );
+          break;
+      }
 
       setReview(response);
     } catch (error) {
@@ -54,17 +88,32 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
       <div className="flex items-center justify-between p-2 border-b border-vscode-border">
         <div className="flex items-center gap-4">
           <Select
-            value={selectedModel}
-            onValueChange={setSelectedModel}
+            value={selectedVendor}
+            onValueChange={(value: Vendor) => setSelectedVendor(value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select model" />
+              <SelectValue placeholder="Select vendor" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="gpt-4o">GPT-4 Optimized</SelectItem>
-              <SelectItem value="gpt-4o-mini">GPT-4 Mini</SelectItem>
+              <SelectItem value="openai">OpenAI</SelectItem>
+              <SelectItem value="google">Google AI</SelectItem>
+              <SelectItem value="github">GitHub Copilot</SelectItem>
             </SelectContent>
           </Select>
+          {selectedVendor === "openai" && (
+            <Select
+              value={selectedModel}
+              onValueChange={setSelectedModel}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gpt-4o">GPT-4 Optimized</SelectItem>
+                <SelectItem value="gpt-4o-mini">GPT-4 Mini</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           <Input
             type="password"
             placeholder="Enter API Key"
@@ -93,7 +142,7 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto p-4 font-mono text-sm">
+      <div className="flex-1 overflow-auto p-4 font-mono text-sm whitespace-pre-wrap">
         {review}
       </div>
     </div>
