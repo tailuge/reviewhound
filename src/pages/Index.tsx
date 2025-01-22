@@ -83,8 +83,8 @@ const Index = () => {
         isLoading={isLoading}
       />
 
-      <main className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 min-h-0">
+      <main className="flex-1 overflow-hidden flex flex-col relative">
+        <div className="absolute inset-0 pb-[20vh]">
           <ResizablePanel
             left={
               <div className="h-full overflow-auto">
