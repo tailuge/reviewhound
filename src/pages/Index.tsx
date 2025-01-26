@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { TreeView } from "@/components/TreeView";
 import { CodePanel } from "@/components/CodePanel";
-import { ResizablePanel } from "@/components/ResizablePanel";
-import { RepoHeader } from "@/components/RepoHeader";
+import { ResizablePanel as CustomResizablePanel } from "@/components/ResizablePanel";
 import { Terminal } from "@/components/Terminal";
 import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
-import { ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
+import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 
 interface TreeItem {
   name: string;
@@ -86,8 +85,8 @@ const Index = () => {
 
       <main className="flex-1 overflow-hidden flex flex-col">
         <ResizablePanelGroup direction="vertical" className="flex-1">
-          <ResizablePanel defaultSize={80} minSize={20}>
-            <ResizablePanel
+          <ResizablePanel defaultSize={80}>
+            <CustomResizablePanel
               left={
                 <div className="h-full overflow-auto">
                   <TreeView
