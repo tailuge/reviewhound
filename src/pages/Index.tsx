@@ -85,8 +85,8 @@ const Index = () => {
       />
 
       <main className="flex-1 overflow-hidden flex flex-col">
-        <ResizablePanelGroup direction="vertical" className="flex-1">
-          <ResizablePanel defaultSize={80}>
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={75} minSize={30}>
             <CustomResizablePanel
               left={
                 <div className="h-full overflow-auto">
@@ -100,7 +100,9 @@ const Index = () => {
             />
           </ResizablePanel>
           <ResizableHandle />
-          <Terminal codeContent={fileContent || ""} />
+          <ResizablePanel defaultSize={25} minSize={10}>
+            <Terminal codeContent={fileContent || ""} />
+          </ResizablePanel>
         </ResizablePanelGroup>
       </main>
     </div>
