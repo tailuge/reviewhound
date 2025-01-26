@@ -21,6 +21,7 @@ export const VendorSelect = ({ value, onChange }: VendorSelectProps) => (
       <SelectValue placeholder="Select vendor" />
     </SelectTrigger>
     <SelectContent>
+      <SelectItem value="free">Free (Gemini)</SelectItem>
       <SelectItem value="openai">OpenAI</SelectItem>
       <SelectItem value="google">Google AI</SelectItem>
       <SelectItem value="github">GitHub Copilot</SelectItem>

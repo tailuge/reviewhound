@@ -6,6 +6,7 @@ import { ModelSelect } from "./terminal/ModelSelect";
 import { LLMServiceFactory } from "@/services/llm/factory";
 import { LLMVendor, OpenAIModel } from "@/types/llm";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TerminalProps {
   codeContent?: string;
@@ -21,8 +22,19 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   const { toast } = useToast();
 
   const handleReview = async () => {
-    if (!apiKey || !codeContent) {
-      const errorMessage = "API key and code content are required";
+    if (!codeContent) {
+      const errorMessage = "Code content is required";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedVendor !== "free" && !apiKey) {
+      const errorMessage = "API key is required";
       setError(errorMessage);
       toast({
         title: "Error",
@@ -35,18 +47,29 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await LLMServiceFactory.reviewCode({
-        code: codeContent,
-        apiKey,
-        vendor: selectedVendor,
-        model: selectedModel,
-      });
+      if (selectedVendor === "free") {
+        const { data, error } = await supabase.functions.invoke('free-code-review', {
+          body: { code: codeContent }
+        });
 
-      if (response.error) {
-        throw new Error(response.error);
+        if (error) throw new Error(error.message);
+        if (data.error) throw new Error(data.error);
+        
+        setReview(data.review);
+      } else {
+        const response = await LLMServiceFactory.reviewCode({
+          code: codeContent,
+          apiKey,
+          vendor: selectedVendor,
+          model: selectedModel,
+        });
+
+        if (response.error) {
+          throw new Error(response.error);
+        }
+
+        setReview(response.review);
       }
-
-      setReview(response.review);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to review code";
       console.error("Error during code review:", error);
@@ -69,20 +92,22 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
           {selectedVendor === "openai" && (
             <ModelSelect value={selectedModel} onChange={setSelectedModel} />
           )}
-          <Input
-            type="password"
-            placeholder="Enter API Key"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="w-[240px]"
-          />
+          {selectedVendor !== "free" && (
+            <Input
+              type="password"
+              placeholder="Enter API Key"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="w-[240px]"
+            />
+          )}
         </div>
         <div className="space-x-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleReview}
-            disabled={isLoading || !apiKey}
+            disabled={isLoading || (!apiKey && selectedVendor !== "free")}
             className="text-vscode-text hover:text-white"
           >
             {isLoading ? "Reviewing..." : "Review"}

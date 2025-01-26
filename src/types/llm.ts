@@ -1,4 +1,4 @@
-export type LLMVendor = "openai" | "google" | "github";
+export type LLMVendor = "openai" | "google" | "github" | "free";
 export type OpenAIModel = "gpt-4o" | "gpt-4o-mini";
 
 export interface CodeReviewRequest {
