@@ -76,7 +76,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col h-screen">
       <RepoHeader
         repoUrl={repoUrl}
         onRepoUrlChange={setRepoUrl}
@@ -84,8 +84,8 @@ const Index = () => {
         isLoading={isLoading}
       />
 
-      <main className="flex-1 overflow-hidden flex flex-col">
-        <ResizablePanelGroup direction="vertical">
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="vertical" className="h-full">
           <ResizablePanel defaultSize={75} minSize={30}>
             <CustomResizablePanel
               left={
@@ -104,7 +104,7 @@ const Index = () => {
             <Terminal codeContent={fileContent || ""} />
           </ResizablePanel>
         </ResizablePanelGroup>
-      </main>
+      </div>
     </div>
   );
 };

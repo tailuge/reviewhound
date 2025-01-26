@@ -8,7 +8,6 @@ import { LLMVendor, OpenAIModel } from "@/types/llm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface TerminalProps {
   codeContent?: string;
@@ -89,9 +88,9 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   };
 
   return (
-    <div className="h-full">
-      <div className="h-full bg-vscode-bg border-t border-vscode-border flex flex-col">
-        <div className="flex items-center justify-between p-2 border-b border-vscode-border">
+    <div className="h-full flex flex-col bg-vscode-bg border-t border-vscode-border">
+      <div className="flex-none p-2 border-b border-vscode-border">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <VendorSelect value={selectedVendor} onChange={setSelectedVendor} />
             {selectedVendor === "openai" && (
@@ -127,15 +126,15 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
             </Button>
           </div>
         </div>
-        <div className="flex-1 overflow-auto p-4 font-mono text-sm">
-          {error ? (
-            <div className="text-red-500">{error}</div>
-          ) : (
-            <ReactMarkdown className="prose prose-invert max-w-none">
-              {review}
-            </ReactMarkdown>
-          )}
-        </div>
+      </div>
+      <div className="flex-1 overflow-auto p-4 font-mono text-sm">
+        {error ? (
+          <div className="text-red-500">{error}</div>
+        ) : (
+          <ReactMarkdown className="prose prose-invert max-w-none">
+            {review}
+          </ReactMarkdown>
+        )}
       </div>
     </div>
   );
