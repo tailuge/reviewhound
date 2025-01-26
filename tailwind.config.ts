@@ -18,6 +18,42 @@ export default {
       },
     },
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: '#cccccc',
+            a: {
+              color: '#007acc',
+              '&:hover': {
+                color: '#1a8cd8',
+              },
+            },
+            h1: {
+              color: '#cccccc',
+            },
+            h2: {
+              color: '#cccccc',
+            },
+            h3: {
+              color: '#cccccc',
+            },
+            h4: {
+              color: '#cccccc',
+            },
+            code: {
+              color: '#cccccc',
+              backgroundColor: '#1e1e1e',
+              padding: '0.2em 0.4em',
+              borderRadius: '3px',
+            },
+            'pre code': {
+              backgroundColor: 'transparent',
+              padding: 0,
+            },
+          },
+        },
+      },
       colors: {
         vscode: {
           bg: "#1e1e1e",
@@ -73,5 +109,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography")
+  ],
 } satisfies Config;
