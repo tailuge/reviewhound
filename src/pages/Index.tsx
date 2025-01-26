@@ -6,6 +6,7 @@ import { RepoHeader } from "@/components/RepoHeader";
 import { Terminal } from "@/components/Terminal";
 import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
+import { ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
 
 interface TreeItem {
   name: string;
@@ -83,21 +84,24 @@ const Index = () => {
         isLoading={isLoading}
       />
 
-      <main className="flex-1 overflow-hidden flex flex-col relative">
-        <div className="absolute inset-0 pb-[20vh]">
-          <ResizablePanel
-            left={
-              <div className="h-full overflow-auto">
-                <TreeView
-                  data={treeData}
-                  onSelect={handleFileSelect}
-                />
-              </div>
-            }
-            right={<CodePanel code={fileContent || undefined} />}
-          />
-        </div>
-        <Terminal codeContent={fileContent || ""} />
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <ResizablePanelGroup direction="vertical" className="flex-1">
+          <ResizablePanel defaultSize={80} minSize={20}>
+            <ResizablePanel
+              left={
+                <div className="h-full overflow-auto">
+                  <TreeView
+                    data={treeData}
+                    onSelect={handleFileSelect}
+                  />
+                </div>
+              }
+              right={<CodePanel code={fileContent || undefined} />}
+            />
+          </ResizablePanel>
+          <ResizableHandle />
+          <Terminal codeContent={fileContent || ""} />
+        </ResizablePanelGroup>
       </main>
     </div>
   );

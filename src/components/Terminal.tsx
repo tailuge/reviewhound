@@ -8,7 +8,7 @@ import { LLMVendor, OpenAIModel } from "@/types/llm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
-import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface TerminalProps {
   codeContent?: string;
@@ -91,11 +91,14 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   return (
     <ResizablePanelGroup
       direction="vertical"
-      className="fixed bottom-0 left-0 right-0"
-      style={{ height: '20vh', minHeight: '100px', maxHeight: '80vh' }}
+      className="fixed bottom-0 left-0 right-0 min-h-[100px]"
     >
       <ResizableHandle />
-      <ResizablePanel defaultSize={100}>
+      <ResizablePanel
+        defaultSize={20}
+        minSize={10}
+        maxSize={80}
+      >
         <div className="h-full bg-vscode-bg border-t border-vscode-border flex flex-col">
           <div className="flex items-center justify-between p-2 border-b border-vscode-border">
             <div className="flex items-center gap-4">
