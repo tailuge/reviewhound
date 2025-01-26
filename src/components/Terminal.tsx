@@ -48,13 +48,15 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
     setError(null);
     try {
       if (selectedVendor === "free") {
-        const { data, error } = await supabase.functions.invoke('free-code-review', {
+        console.log('Calling free code review function');
+        const { data, error: functionError } = await supabase.functions.invoke('free-code-review', {
           body: { code: codeContent }
         });
 
-        if (error) throw new Error(error.message);
+        if (functionError) throw new Error(functionError.message);
         if (data.error) throw new Error(data.error);
         
+        console.log('Received response from free code review:', data);
         setReview(data.review);
       } else {
         const response = await LLMServiceFactory.reviewCode({

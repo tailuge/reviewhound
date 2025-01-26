@@ -24,6 +24,7 @@ serve(async (req) => {
       throw new Error('No code provided');
     }
 
+    console.log('Initializing Gemini with provided key');
     const genAI = new GoogleGenerativeAI(geminiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -31,8 +32,10 @@ serve(async (req) => {
     
     ${code}`;
 
+    console.log('Sending request to Gemini');
     const result = await model.generateContent(prompt);
     const review = result.response.text();
+    console.log('Received response from Gemini');
 
     return new Response(
       JSON.stringify({ review }),
