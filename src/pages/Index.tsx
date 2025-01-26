@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TreeView } from "@/components/TreeView";
 import { CodePanel } from "@/components/CodePanel";
 import { ResizablePanel as CustomResizablePanel } from "@/components/ResizablePanel";
+import { RepoHeader } from "@/components/RepoHeader";
 import { Terminal } from "@/components/Terminal";
 import { fetchRepoTree, fetchFileContent } from "@/utils/github";
 import { useToast } from "@/components/ui/use-toast";
