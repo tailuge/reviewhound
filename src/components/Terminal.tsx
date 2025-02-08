@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ interface TerminalProps {
 }
 
 export const Terminal = ({ codeContent }: TerminalProps) => {
-  const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("openai");
+  const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("free");
   const [selectedModel, setSelectedModel] = useState<OpenAIModel>("gpt-4o");
   const [apiKey, setApiKey] = useState("");
   const [review, setReview] = useState("");
@@ -51,7 +52,10 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
       if (selectedVendor === "free") {
         console.log('Calling free code review function');
         const { data, error: functionError } = await supabase.functions.invoke('free-code-review', {
-          body: { code: codeContent }
+          body: { 
+            code: codeContent,
+            filePath: selectedFile || 'unknown'
+          }
         });
 
         if (functionError) throw new Error(functionError.message);

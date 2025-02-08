@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@^0.1.3";
@@ -19,16 +20,16 @@ serve(async (req) => {
       throw new Error('GEMINI_KEY not configured');
     }
 
-    const { code } = await req.json();
+    const { code, filePath } = await req.json();
     if (!code) {
       throw new Error('No code provided');
     }
 
     console.log('Initializing Gemini with provided key');
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `Please review this code and provide feedback on potential improvements, bugs, and best practices. 
+    const prompt = `Please review this code from file "${filePath}" and provide feedback on potential improvements, bugs, and best practices. 
     To be as efficient as possible understand that you are an experienced architect talking to an experienced developer. 
     There is no need to be polite, just get to the point with 1 or at most 2 suggestions. 
     The code will be either typescript of json config files review accordingly. 
