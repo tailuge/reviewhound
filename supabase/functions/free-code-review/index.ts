@@ -28,7 +28,11 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(geminiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `Please review this code and provide feedback on potential improvements, bugs, and best practices:
+    const prompt = `Please review this code and provide feedback on potential improvements, bugs, and best practices. 
+    To be as efficient as possible understand that you are an experienced architect talking to an experienced developer. 
+    There is no need to be polite, just get to the point with 1 or at most 2 suggestions. 
+    The code will be either typescript of json config files review accordingly. 
+    Your response can be formatted using markdown but should still aim to be minimal:
     
     ${code}`;
 
