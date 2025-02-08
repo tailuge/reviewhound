@@ -30,9 +30,10 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Please review this code from file "${filePath}" and provide feedback on potential improvements, bugs, and best practices. 
-    To be as efficient as possible understand that you are an experienced architect talking to an experienced developer. 
+    Do not worry about error handling, focus on modularity, readability and clean minimalism.
+    To be as efficient as possible understand that you are an experienced software architect talking to an experienced developer. 
     There is no need to be polite, just get to the point with 1 or at most 2 suggestions. 
-    The code will be either typescript of json config files review accordingly. 
+    The code will be either typescript or json config files review accordingly. 
     Your response can be formatted using markdown but should still aim to be minimal:
     
     ${code}`;
