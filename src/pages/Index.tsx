@@ -16,7 +16,7 @@ interface TreeItem {
   content?: string;
 }
 
-const DEFAULT_REPO = "https://github.com/tailuge/codorebyu";
+const DEFAULT_REPO = "https://github.com/tailuge/reviewhound";
 
 const Index = () => {
   const [repoUrl, setRepoUrl] = useState(DEFAULT_REPO);
