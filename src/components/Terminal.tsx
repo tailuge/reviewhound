@@ -21,6 +21,7 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   const [review, setReview] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleReview = async () => {
