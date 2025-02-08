@@ -4,7 +4,7 @@
   <img height="20" alt="Open in IDX" src="https://cdn.idx.dev/btn/open_purple_20.svg">
 </a>
 
-<a href="https://reviewhound.lovable.dev">live demo</a>
+<a href="https://reviewhound.lovable.app">live demo</a>
 
 ## Project info
 
