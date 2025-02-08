@@ -92,6 +92,53 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
     }
   };
 
+  const handleApply = async () => {
+    if (!codeContent || !review) {
+      const errorMessage = "Both code and review are required";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log('Calling apply code changes function');
+      const { data, error: functionError } = await supabase.functions.invoke('apply-code-changes', {
+        body: { 
+          code: codeContent,
+          review,
+          filePath: selectedFile || 'unknown'
+        }
+      });
+
+      if (functionError) throw new Error(functionError.message);
+      if (data.error) throw new Error(data.error);
+      
+      console.log('Received response from apply code changes:', data);
+      setReview(data.modifiedCode);
+      toast({
+        title: "Success",
+        description: "Code changes applied successfully",
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to apply code changes";
+      console.error("Error applying code changes:", error);
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col bg-vscode-bg border-t border-vscode-border">
       <div className="flex-none p-2 border-b border-vscode-border">
@@ -124,10 +171,11 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => console.log('Apply clicked')}
+              onClick={handleApply}
+              disabled={isLoading || !review}
               className="text-vscode-text hover:text-white"
             >
-              Apply
+              {isLoading ? "Applying..." : "Apply"}
             </Button>
           </div>
         </div>
