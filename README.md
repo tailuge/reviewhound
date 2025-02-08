@@ -1,5 +1,11 @@
 # Welcome to your Lovable project
 
+<a href="https://idx.google.com/import?url=https%3A%2F%2Fgithub.com%2Ftailuge%2Freviewhound">
+  <img height="20" alt="Open in IDX" src="https://cdn.idx.dev/btn/open_purple_20.svg">
+</a>
+
+<a href="https://reviewhound.lovable.dev">live demo</a>
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/ad48eac2-d4d9-4440-80a9-f608987de4b7
