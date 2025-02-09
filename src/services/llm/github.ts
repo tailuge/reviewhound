@@ -1,3 +1,4 @@
+
 import { OpenAI } from "@langchain/openai";
 import { BaseLLMService } from "./base";
 import { CodeReviewRequest, CodeReviewResponse } from "@/types/llm";
@@ -14,7 +15,7 @@ export class GitHubCopilotService extends BaseLLMService {
         },
       });
 
-      const response = await githubOpenAI.invoke(this.formatPrompt(request.code));
+      const response = await githubOpenAI.invoke(this.formatPrompt(request.code, request.prompt));
       return { review: response };
     } catch (error) {
       return { 

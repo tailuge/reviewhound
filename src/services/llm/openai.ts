@@ -1,3 +1,4 @@
+
 import { OpenAI } from "@langchain/openai";
 import { BaseLLMService } from "./base";
 import { CodeReviewRequest, CodeReviewResponse } from "@/types/llm";
@@ -11,7 +12,7 @@ export class OpenAIService extends BaseLLMService {
         temperature: 0.2,
       });
 
-      const response = await openai.invoke(this.formatPrompt(request.code));
+      const response = await openai.invoke(this.formatPrompt(request.code, request.prompt));
       return { review: response };
     } catch (error) {
       return { 

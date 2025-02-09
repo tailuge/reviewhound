@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { VendorSelect } from "./terminal/VendorSelect";
 import { ModelSelect } from "./terminal/ModelSelect";
 import { LLMServiceFactory } from "@/services/llm/factory";
@@ -9,10 +10,27 @@ import { LLMVendor, OpenAIModel } from "@/types/llm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import { Cog } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface TerminalProps {
   codeContent?: string;
 }
+
+const DEFAULT_PROMPT = `Please review this code and provide feedback on potential improvements, bugs, and best practices:
+
+CODE:
+{code}
+
+Focus on:
+1. Code quality and readability
+2. Performance optimizations
+3. Security concerns
+4. Best practices
+5. Potential bugs
+6. Architecture improvements
+
+Please provide specific, actionable feedback.`;
 
 export const Terminal = ({ codeContent }: TerminalProps) => {
   const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("free");
@@ -22,6 +40,7 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const { toast } = useToast();
 
   const handleReview = async () => {
@@ -55,7 +74,8 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
         const { data, error: functionError } = await supabase.functions.invoke('free-code-review', {
           body: { 
             code: codeContent,
-            filePath: selectedFile || 'unknown'
+            filePath: selectedFile || 'unknown',
+            prompt: prompt.replace('{code}', codeContent)
           }
         });
 
@@ -70,6 +90,7 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
           apiKey,
           vendor: selectedVendor,
           model: selectedModel,
+          prompt: prompt.replace('{code}', codeContent)
         });
 
         if (response.error) {
@@ -139,6 +160,14 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
     }
   };
 
+  const handleResetPrompt = () => {
+    setPrompt(DEFAULT_PROMPT);
+    toast({
+      title: "Success",
+      description: "Prompt reset to default",
+    });
+  };
+
   return (
     <div className="h-full flex flex-col bg-vscode-bg border-t border-vscode-border">
       <div className="flex-none p-2 border-b border-vscode-border">
@@ -158,7 +187,41 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
               />
             )}
           </div>
-          <div className="space-x-2">
+          <div className="space-x-2 flex items-center">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-vscode-text hover:text-white"
+                >
+                  <Cog className="w-4 h-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Review Settings</SheetTitle>
+                  <SheetDescription>
+                    Customize the prompt used for code review. Use {'{code}'} as a placeholder for the code content.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="py-4 space-y-4">
+                  <Textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="min-h-[300px] font-mono text-sm"
+                    placeholder="Enter your custom prompt..."
+                  />
+                  <Button
+                    onClick={handleResetPrompt}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Reset to Default
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
             <Button
               variant="ghost"
               size="sm"

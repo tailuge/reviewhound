@@ -1,3 +1,4 @@
+
 export type LLMVendor = "openai" | "google" | "github" | "free";
 export type OpenAIModel = "gpt-4o" | "gpt-4o-mini";
 
@@ -6,6 +7,7 @@ export interface CodeReviewRequest {
   apiKey: string;
   vendor: LLMVendor;
   model?: OpenAIModel;
+  prompt?: string;
 }
 
 export interface CodeReviewResponse {

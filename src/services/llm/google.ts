@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseLLMService } from "./base";
 import { CodeReviewRequest, CodeReviewResponse } from "@/types/llm";
@@ -7,7 +8,7 @@ export class GoogleAIService extends BaseLLMService {
     try {
       const genAI = new GoogleGenerativeAI(request.apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-      const result = await model.generateContent(this.formatPrompt(request.code));
+      const result = await model.generateContent(this.formatPrompt(request.code, request.prompt));
       return { review: result.response.text() };
     } catch (error) {
       return { 
