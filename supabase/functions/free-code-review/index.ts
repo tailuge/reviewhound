@@ -20,20 +20,20 @@ serve(async (req) => {
       throw new Error('GEMINI_KEY not configured');
     }
 
-    const { code, filePath, prompt } = await req.json();
+    const { code, filePath, prompt, model } = await req.json();
     if (!code) {
       throw new Error('No code provided');
     }
 
     console.log('Initializing Gemini with provided key');
     const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const modelInstance = genAI.getGenerativeModel({ model: model || "gemini-2.0-flash" });
 
     // Use custom prompt if provided, otherwise use default
     const promptText = prompt || `Please review this code from file "${filePath}" and provide feedback on potential improvements, bugs, and best practices.`;
 
     console.log('Sending request to Gemini');
-    const result = await model.generateContent(promptText);
+    const result = await modelInstance.generateContent(promptText);
     const review = result.response.text();
     console.log('Received response from Gemini');
 

@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { LLMServiceFactory } from "@/services/llm/factory";
-import { LLMVendor, OpenAIModel } from "@/types/llm";
+import { LLMVendor, OpenAIModel, GeminiModel } from "@/types/llm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TerminalHeader } from "./terminal/TerminalHeader";
 import { ReviewContent } from "./terminal/ReviewContent";
+import { Search } from "lucide-react";
 
 interface TerminalProps {
   codeContent?: string;
@@ -27,28 +28,48 @@ Focus on:
 Please provide specific, actionable feedback.`;
 
 const LOCAL_STORAGE_PROMPT_KEY = 'code-review-prompt';
+const LOCAL_STORAGE_CONTEXT_REGEXP_KEY = 'code-review-context-regexp';
+const LOCAL_STORAGE_MODEL_KEY = 'code-review-model';
+const DEFAULT_MODEL: GeminiModel = "gemini-2.0-flash";
 
 export const Terminal = ({ codeContent }: TerminalProps) => {
   const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("free");
   const [selectedModel, setSelectedModel] = useState<OpenAIModel>("gpt-4o");
+  const [selectedGeminiModel, setSelectedGeminiModel] = useState<GeminiModel>(DEFAULT_MODEL);
   const [apiKey, setApiKey] = useState("");
   const [review, setReview] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
+  const [contextRegexp, setContextRegexp] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     const savedPrompt = localStorage.getItem(LOCAL_STORAGE_PROMPT_KEY);
-    if (savedPrompt) {
-      setPrompt(savedPrompt);
-    }
+    const savedContextRegexp = localStorage.getItem(LOCAL_STORAGE_CONTEXT_REGEXP_KEY);
+    const savedModel = localStorage.getItem(LOCAL_STORAGE_MODEL_KEY) as GeminiModel;
+    
+    if (savedPrompt) setPrompt(savedPrompt);
+    if (savedContextRegexp) setContextRegexp(savedContextRegexp);
+    if (savedModel) setSelectedGeminiModel(savedModel);
   }, []);
 
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_PROMPT_KEY, prompt);
   }, [prompt]);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_CONTEXT_REGEXP_KEY, contextRegexp);
+  }, [contextRegexp]);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_MODEL_KEY, selectedGeminiModel);
+  }, [selectedGeminiModel]);
+
+  const handleContextClick = () => {
+    console.log('Current context regexp:', contextRegexp);
+  };
 
   const handleReview = async () => {
     if (!codeContent) {
@@ -82,7 +103,8 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
           body: { 
             code: codeContent,
             filePath: selectedFile || 'unknown',
-            prompt: prompt.replace('{code}', codeContent)
+            prompt: prompt.replace('{code}', codeContent),
+            model: selectedGeminiModel
           }
         });
 
@@ -181,16 +203,21 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
       <TerminalHeader
         selectedVendor={selectedVendor}
         selectedModel={selectedModel}
+        selectedGeminiModel={selectedGeminiModel}
         apiKey={apiKey}
         prompt={prompt}
+        contextRegexp={contextRegexp}
         isLoading={isLoading}
         hasReview={Boolean(review)}
         onVendorChange={setSelectedVendor}
         onModelChange={setSelectedModel}
+        onGeminiModelChange={setSelectedGeminiModel}
         onApiKeyChange={setApiKey}
         onPromptChange={setPrompt}
+        onContextRegexpChange={setContextRegexp}
         onResetPrompt={handleResetPrompt}
         onReview={handleReview}
+        onContextClick={handleContextClick}
         onApply={handleApply}
       />
       <ReviewContent error={error} review={review} />
