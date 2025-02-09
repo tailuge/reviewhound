@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,8 @@ Focus on:
 
 Please provide specific, actionable feedback.`;
 
+const LOCAL_STORAGE_PROMPT_KEY = 'code-review-prompt';
+
 export const Terminal = ({ codeContent }: TerminalProps) => {
   const [selectedVendor, setSelectedVendor] = useState<LLMVendor>("free");
   const [selectedModel, setSelectedModel] = useState<OpenAIModel>("gpt-4o");
@@ -42,6 +44,19 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const { toast } = useToast();
+
+  // Load saved prompt from localStorage on component mount
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem(LOCAL_STORAGE_PROMPT_KEY);
+    if (savedPrompt) {
+      setPrompt(savedPrompt);
+    }
+  }, []);
+
+  // Save prompt to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_PROMPT_KEY, prompt);
+  }, [prompt]);
 
   const handleReview = async () => {
     if (!codeContent) {
@@ -162,6 +177,7 @@ export const Terminal = ({ codeContent }: TerminalProps) => {
 
   const handleResetPrompt = () => {
     setPrompt(DEFAULT_PROMPT);
+    localStorage.setItem(LOCAL_STORAGE_PROMPT_KEY, DEFAULT_PROMPT);
     toast({
       title: "Success",
       description: "Prompt reset to default",

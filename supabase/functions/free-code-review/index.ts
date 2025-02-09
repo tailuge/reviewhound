@@ -20,7 +20,7 @@ serve(async (req) => {
       throw new Error('GEMINI_KEY not configured');
     }
 
-    const { code, filePath } = await req.json();
+    const { code, filePath, prompt } = await req.json();
     if (!code) {
       throw new Error('No code provided');
     }
@@ -29,17 +29,11 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(geminiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `Please review this code from file "${filePath}" and provide feedback on potential improvements, bugs, and best practices. 
-    Do not worry about error handling, focus on modularity, readability and clean minimalism.
-    To be as efficient as possible understand that you are an experienced software architect talking to an experienced developer. 
-    There is no need to be polite, just get to the point with 1 or at most 2 suggestions. 
-    The code will be either typescript or json config files review accordingly. 
-    Your response can be formatted using markdown but should still aim to be minimal:
-    
-    ${code}`;
+    // Use custom prompt if provided, otherwise use default
+    const promptText = prompt || `Please review this code from file "${filePath}" and provide feedback on potential improvements, bugs, and best practices.`;
 
     console.log('Sending request to Gemini');
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(promptText);
     const review = result.response.text();
     console.log('Received response from Gemini');
 
